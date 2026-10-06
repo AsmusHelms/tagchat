@@ -1,154 +1,60 @@
 const socket = io();
-
-const entry = document.querySelector('#entry');
-const roomScreen = document.querySelector('#roomScreen');
-const joinForm = document.querySelector('#joinForm');
-const aliasInput = document.querySelector('#aliasInput');
-const joinError = document.querySelector('#joinError');
-const world = document.querySelector('#world');
-const messageForm = document.querySelector('#messageForm');
-const messageInput = document.querySelector('#messageInput');
-const counter = document.querySelector('#counter');
-const chatToggle = document.querySelector('#chatToggle');
-const chatClose = document.querySelector('#chatClose');
-const chatPanel = document.querySelector('#chatPanel');
-const chatLog = document.querySelector('#chatLog');
-const presence = document.querySelector('#presence');
-
-const COLS = 9;
-const ROWS = 16;
-const users = new Map();
-const bubbleTimers = new Map();
-let selfId = null;
-let blocked = new Set();
-
-function key(x, y) { return `${x},${y}`; }
-
-function makeAvatar(user) {
-  const el = document.createElement('div');
-  el.className = 'avatar';
-  el.dataset.id = user.id;
-  el.innerHTML = `
-    <div class="avatar-inner">
-      <div class="bubble" hidden></div>
-      <img class="head" src="/avatar.gif" alt="" draggable="false">
-      <div class="alias"></div>
-    </div>
-  `;
-  el.querySelector('.alias').textContent = user.alias;
-  world.appendChild(el);
-  return el;
+const $ = id => document.getElementById(id);
+const world=$('world'), users=new Map(), timers=new Map();
+let selfId=null, roomId='rooftops', blocked=new Set(), rememberedAlias='';
+function viewport(){const v=window.visualViewport;document.documentElement.style.setProperty('--viewport-h',`${v?.height||innerHeight}px`);document.documentElement.style.setProperty('--viewport-top',`${v?.offsetTop||0}px`);clampPanel();}
+function positionBubble(u){
+  if(u.bubble.hidden)return;
+  const r=world.getBoundingClientRect(), a=u.el.getBoundingClientRect(), b=u.bubble;
+  b.style.maxWidth=`${Math.min(220,r.width-12)}px`;
+  b.style.left=`${Math.max(6,Math.min(r.width-b.offsetWidth-6,a.left-r.left+a.width/2-b.offsetWidth/2))}px`;
+  b.style.top=`${Math.max(4,Math.min(r.height-b.offsetHeight-4,a.top-r.top-b.offsetHeight-6))}px`;
 }
-
-function renderUser(user) {
-  let record = users.get(user.id);
-  if (!record) {
-    record = { ...user, el: makeAvatar(user) };
-    users.set(user.id, record);
-  } else {
-    Object.assign(record, user);
-  }
-  record.el.style.setProperty('--x', record.x);
-  record.el.style.setProperty('--y', record.y);
+function renderUser(u){let r=users.get(u.id);if(!r){
+ const el=document.createElement('div');el.className='avatar';
+ const inner=document.createElement('div');inner.className='avatar-inner';
+ const head=document.createElement('img');head.className='head';head.src=u.avatar||'/avatar.gif';head.alt='';head.draggable=false;
+ const alias=document.createElement('div');alias.className='alias';alias.textContent=u.alias;
+ inner.append(head,alias);el.append(inner);
+ const bubble=document.createElement('div');bubble.className='bubble';bubble.hidden=true;
+ world.append(el,bubble);r={...u,el,bubble};users.set(u.id,r);
+ }else Object.assign(r,u);
+ r.el.style.setProperty('--x',r.x);r.el.style.setProperty('--y',r.y);positionBubble(r);
 }
-
-function removeUser(id) {
-  const user = users.get(id);
-  if (!user) return;
-  user.el.remove();
-  users.delete(id);
-  clearTimeout(bubbleTimers.get(id));
-  bubbleTimers.delete(id);
-}
-
-function showBubble(message) {
-  const user = users.get(message.userId);
-  if (!user) return;
-  const bubble = user.el.querySelector('.bubble');
-  bubble.textContent = message.text;
-  bubble.hidden = false;
-
-  clearTimeout(bubbleTimers.get(message.userId));
-  const timer = setTimeout(() => {
-    bubble.hidden = true;
-  }, 8000);
-  bubbleTimers.set(message.userId, timer);
-}
-
-function addChatLine(message) {
-  const line = document.createElement('div');
-  line.className = 'chat-line';
-  const alias = document.createElement('strong');
-  alias.textContent = `${message.alias}: `;
-  const text = document.createTextNode(message.text);
-  line.append(alias, text);
-  chatLog.appendChild(line);
-  chatLog.scrollTop = chatLog.scrollHeight;
-}
-
-joinForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const alias = aliasInput.value.trim().slice(0, 16);
-  joinError.textContent = '';
-
-  socket.emit('join', alias, (response) => {
-    if (!response?.ok) {
-      joinError.textContent = response?.error || 'Kunne ikke gå ind.';
-      return;
-    }
-
-    selfId = response.selfId;
-    blocked = new Set(response.state.blockedCells || []);
-    response.state.users.forEach(renderUser);
-    response.state.messages.forEach(addChatLine);
-    presence.textContent = `${response.state.users.length} / 10`;
-
-    entry.classList.add('hidden');
-    roomScreen.classList.remove('hidden');
-    messageInput.focus();
-  });
+function removeUser(id){const r=users.get(id);if(!r)return;r.el.remove();r.bubble.remove();users.delete(id);clearTimeout(timers.get(id));timers.delete(id);}
+function chatLine(m){const line=document.createElement('div');line.className='chat-line';const a=document.createElement('strong');a.textContent=m.alias+': ';line.append(a,document.createTextNode(m.text));$('chatLog').append(line);while($('chatLog').children.length>50)$('chatLog').firstChild.remove();$('chatLog').scrollTop=$('chatLog').scrollHeight;}
+function catalog(list){$('roomSelect').replaceChildren(...list.map(r=>{const o=document.createElement('option');o.value=r.id;o.textContent=`${r.name} (${r.count}/${r.max})${r.available?'':' — afventer grafik'}`;o.disabled=!r.available;return o;}));$('roomSelect').value=roomId;}
+function applyState(response){selfId=response.selfId;const s=response.state;roomId=s.roomId;[...users.keys()].forEach(removeUser);$('chatLog').replaceChildren();blocked=new Set(s.blockedCells);world.style.backgroundImage=`url("${s.background}")`;s.users.forEach(renderUser);s.messages.forEach(chatLine);catalog(s.rooms);$('presence').textContent=`${s.users.length} / 16`;}
+$('joinForm').addEventListener('submit',e=>{e.preventDefault();rememberedAlias=$('aliasInput').value.trim().slice(0,16);socket.emit('join',rememberedAlias,r=>{if(!r?.ok){$('joinError').textContent=r?.error||'Kunne ikke gå ind.';return;}applyState(r);$('entry').classList.add('hidden');$('roomScreen').classList.remove('hidden');viewport();});});
+$('roomSelect').addEventListener('change',()=>{socket.emit('room:change',$('roomSelect').value,r=>{if(!r?.ok){$('roomError').textContent=r?.error||'Kunne ikke skifte rum.';$('roomSelect').value=roomId;return;}$('roomError').textContent='';applyState(r);});});
+const imageOverlay=$('imageOverlay'), overlayImage=$('overlayImage');
+function closeOverlay(){imageOverlay.classList.add('hidden');overlayImage.removeAttribute('src');}
+function openOverlay(src){overlayImage.src=src;imageOverlay.classList.remove('hidden');imageOverlay.focus();}
+imageOverlay.addEventListener('click',e=>{e.stopPropagation();closeOverlay();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay();});
+world.addEventListener('click',e=>{
+ if(!selfId||!socket.connected)return;
+ const r=world.getBoundingClientRect();const px=Math.min(1079,Math.max(0,Math.floor((e.clientX-r.left)/r.width*1080))),py=Math.min(1919,Math.max(0,Math.floor((e.clientY-r.top)/r.height*1920)));
+ socket.emit('move',{x:Math.floor(px/120),y:Math.floor(py/120),px,py},response=>{
+   if(response?.state){closeOverlay();applyState(response);$('roomError').textContent='';}
+   else if(response?.overlay)openOverlay(response.overlay);
+   else if(response?.error)$('roomError').textContent=response.error;
+ });
 });
-
-world.addEventListener('click', (event) => {
-  if (!selfId) return;
-  const rect = world.getBoundingClientRect();
-  const x = Math.min(COLS - 1, Math.max(0, Math.floor(((event.clientX - rect.left) / rect.width) * COLS)));
-  const y = Math.min(ROWS - 1, Math.max(0, Math.floor(((event.clientY - rect.top) / rect.height) * ROWS)));
-  if (blocked.has(key(x, y))) return;
-  socket.emit('move', { x, y });
-});
-
-messageInput.addEventListener('input', () => {
-  counter.textContent = `${messageInput.value.length} / 140`;
-});
-
-messageForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const text = messageInput.value.trim().slice(0, 140);
-  if (!text) return;
-
-  socket.emit('message:send', text, (response) => {
-    if (!response?.ok) return;
-    messageInput.value = '';
-    counter.textContent = '0 / 140';
-    messageInput.focus();
-  });
-});
-
-chatToggle.addEventListener('click', () => chatPanel.setAttribute('aria-hidden', 'false'));
-chatClose.addEventListener('click', () => chatPanel.setAttribute('aria-hidden', 'true'));
-
-socket.on('user:joined', renderUser);
-socket.on('user:moved', ({ id, x, y }) => {
-  const user = users.get(id);
-  if (!user) return;
-  user.x = x;
-  user.y = y;
-  renderUser(user);
-});
-socket.on('user:left', ({ id }) => removeUser(id));
-socket.on('presence', ({ count, max }) => presence.textContent = `${count} / ${max}`);
-socket.on('message:new', (message) => {
-  addChatLine(message);
-  showBubble(message);
-});
+$('messageInput').addEventListener('input',()=>{$('counter').textContent=`${$('messageInput').value.length} / 140`;});
+$('messageForm').addEventListener('submit',e=>{e.preventDefault();const t=$('messageInput').value.trim().slice(0,140);if(!t)return;socket.emit('message:send',t,r=>{if(r?.ok){$('messageInput').value='';$('counter').textContent='0 / 140';}});});
+socket.on('rooms',catalog);socket.on('user:joined',renderUser);socket.on('user:moved',u=>{const r=users.get(u.id);if(r)renderUser({...r,...u});});socket.on('user:left',u=>removeUser(u.id));socket.on('presence',p=>{$('presence').textContent=`${p.count} / ${p.max}`;});
+socket.on('message:new',m=>{chatLine(m);const u=users.get(m.userId);if(!u)return;u.bubble.textContent=m.text;u.bubble.hidden=false;positionBubble(u);clearTimeout(timers.get(u.id));timers.set(u.id,setTimeout(()=>{u.bubble.hidden=true;},8000));});
+socket.on('disconnect',()=>{if(selfId)$('roomError').textContent='Forbindelsen er afbrudt. Forbinder igen…';});
+socket.on('connect',()=>{if(!selfId)return;const target=roomId;socket.emit('join',rememberedAlias,r=>{if(!r?.ok){selfId=null;$('roomScreen').classList.add('hidden');$('entry').classList.remove('hidden');$('joinError').textContent=r?.error||'Kunne ikke genoprette forbindelsen.';return;}applyState(r);$('roomError').textContent='';if(target!=='rooftops')socket.emit('room:change',target,s=>{if(s?.ok)applyState(s);});});});
+const panel=$('chatPanel');let placed=false, drag=null;
+function clampPanel(){if(!placed)return;const v=window.visualViewport;const w=v?.width||innerWidth,h=v?.height||innerHeight,top=v?.offsetTop||0,left=v?.offsetLeft||0;panel.style.left=`${Math.max(left+6,Math.min(parseFloat(panel.style.left)||0,left+w-panel.offsetWidth-6))}px`;panel.style.top=`${Math.max(top+6,Math.min(parseFloat(panel.style.top)||0,top+h-panel.offsetHeight-6))}px`;}
+$('chatToggle').addEventListener('click',()=>{panel.setAttribute('aria-hidden','false');if(!placed){panel.style.left='12px';panel.style.top=`${(window.visualViewport?.offsetTop||0)+60}px`;placed=true;}clampPanel();$('chatLog').scrollTop=$('chatLog').scrollHeight;});$('chatClose').addEventListener('click',()=>panel.setAttribute('aria-hidden','true'));
+const header=panel.querySelector('.chat-header');
+header.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:parseFloat(panel.style.left),top:parseFloat(panel.style.top)};header.setPointerCapture(e.pointerId);});
+header.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;panel.style.left=`${drag.left+e.clientX-drag.x}px`;panel.style.top=`${drag.top+e.clientY-drag.y}px`;clampPanel();});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])header.addEventListener(event,()=>{drag=null;});
+const wrap=world.parentElement;
+new ResizeObserver(()=>{const r=wrap.getBoundingClientRect();const w=Math.min(r.width,r.height*9/16);world.style.width=`${w}px`;world.style.height=`${w*16/9}px`;users.forEach(positionBubble);}).observe(wrap);
+new ResizeObserver(()=>users.forEach(positionBubble)).observe(world);
+window.addEventListener('resize',viewport);window.visualViewport?.addEventListener('resize',viewport);window.visualViewport?.addEventListener('scroll',viewport);viewport();

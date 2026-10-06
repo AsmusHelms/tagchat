@@ -20,20 +20,22 @@
     <section id="roomScreen" class="room-screen hidden">
       <div class="toolbar">
         <button id="chatToggle" type="button">CHAT</button>
-        <span id="presence">0 / 10</span>
+        <select id="roomSelect" aria-label="Vælg rum"><option value="rooftops">TAGENE</option></select>
+        <span id="presence">0 / 16</span>
       </div>
 
       <div class="world-wrap">
         <div id="world" class="world" aria-label="Det fælles rum"></div>
       </div>
 
+      <p id="roomError" class="room-error" aria-live="polite"></p>
       <form id="messageForm" class="message-form" autocomplete="off">
         <input id="messageInput" maxlength="140" placeholder="Skriv noget..." />
         <button type="submit">SEND</button>
         <div id="counter" class="counter">0 / 140</div>
       </form>
 
-      <aside id="chatPanel" class="chat-panel" aria-hidden="true">
+      <aside id="chatPanel" class="chat-panel" aria-label="Chatlog" aria-hidden="true">
         <div class="chat-header">
           <strong>CHAT</strong>
           <button id="chatClose" type="button" aria-label="Luk chat">×</button>
@@ -43,6 +45,7 @@
     </section>
   </main>
 
+  <div id="imageOverlay" class="image-overlay hidden" role="dialog" aria-modal="true" aria-label="Billede — klik for at lukke" tabindex="-1"><img id="overlayImage" alt="Billede fra rummet" /></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>

@@ -173,3 +173,31 @@ button { cursor: pointer; }
 }
 
 .bubble, .chat-panel, button, input { color: #000; }
+
+/* Fit the entire world and controls inside the visible screen, including keyboard changes. */
+html, body { height: 100%; overflow: hidden; }
+.app-shell { height: var(--viewport-h, 100dvh); min-height: 0; position: relative; top: var(--viewport-top, 0px); }
+.entry-screen { min-height: 0; height: 100%; }
+.room-screen { height: 100%; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 8px max(8px, env(safe-area-inset-bottom)); }
+.toolbar { flex-shrink: 0; width: min(100%,540px); gap: 8px; }
+.toolbar button, .toolbar select { padding: 7px 8px; }
+.toolbar select { min-width: 0; flex: 1; font: inherit; background: #fff; color: #000; }
+.world-wrap { flex: 1; min-height: 0; width: 100%; aspect-ratio: auto; display: flex; justify-content: center; }
+.world { position: relative; inset: auto; height: 100%; width: auto; aspect-ratio: 9 / 16; max-width: 100%; max-height: 100%; container-type: inline-size; }
+.message-form { flex-shrink: 0; width: min(100%,540px); }
+.message-form input { font-size: 16px; padding: 10px; }
+.message-form button { padding: 8px; }
+.room-error { margin: 0; font-size: 11px; flex-shrink: 0; }
+.room-error:empty { display: none; }
+.alias { font-size: clamp(6px,2.2cqw,12px); }
+.avatar { z-index: 1; }
+.bubble { position: absolute; z-index: 20; bottom: auto; transform: none; font-size: clamp(10px,3cqw,13px); max-height: calc(100% - 8px); overflow-y: auto; pointer-events: none; }
+.chat-panel { inset: auto; width: min(320px,calc(100vw - 12px)); height: min(300px,calc(var(--viewport-h,100dvh) - 20px)); max-height: none; grid-template-rows: auto minmax(0,1fr); border: 2px solid #111; box-shadow: 0 5px 24px #0008; }
+.chat-header { touch-action: none; cursor: move; user-select: none; padding: 7px 10px; }
+.chat-log { min-height: 0; display: block; overscroll-behavior: contain; }
+.chat-line { margin-bottom: 8px; }
+
+/* 120 × 120 world pixels: one complete 120-pixel grid cell. */
+.avatar-inner { width: 100%; height: 100%; }
+.image-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: #000c; cursor: pointer; touch-action: manipulation; }
+.image-overlay img { width: min(600px, calc(100vw - 24px)); max-height: calc(var(--viewport-h,100dvh) - 24px); object-fit: contain; }
