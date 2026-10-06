@@ -1,59 +1,55 @@
-# TAGCHAT v1
+```text
+████████╗ █████╗  ██████╗  ██████╗██╗  ██╗ █████╗ ████████╗
+╚══██╔══╝██╔══██╗██╔════╝ ██╔════╝██║  ██║██╔══██╗╚══██╔══╝
+   ██║   ███████║██║  ███╗██║     ███████║███████║   ██║
+   ██║   ██╔══██║██║   ██║██║     ██╔══██║██╔══██║   ██║
+   ██║   ██║  ██║╚██████╔╝╚██████╗██║  ██║██║  ██║   ██║
+   ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
+        ///  ASMUS HELMS • 2026  ///
+```
 
-En lille realtime chat-verden med ét fælles rum.
+Jeg hedder Asmus Helms. Jeg er billedkunstner, men nogle gange roder jeg mig ud i webprojekter. Det her er et af dem.
 
-## Kør lokalt
+TAGCHAT er et lille sted på nettet, hvor man kan hænge ud som et hoved. Skriv et navn, find et sted at stå, og sig noget. Lidt gamle chatrum, lidt hustage i New York, lidt en idé, som jeg ikke kunne lade være med at prøve.
 
-1. Installer Node.js (LTS).
-2. Åbn Terminal i denne mappe.
-3. Kør `npm install` første gang.
-4. Kør `npm start`.
-5. Åbn `http://localhost:3000`.
+Der er foreløbigt to rum: tagene og jazzklubben. Ingen konto, ingen profil, ingen krav om et godt brugernavn. Bare op til 16 mennesker i hvert rum og 140 tegn ad gangen.
 
-## v1
+## Sådan virker det
 
-- Projektet hedder TAGCHAT.
-- Hele aliases vises uden forkortelse.
-- Typografien bruger en gammel skrivemaskine-stak: American Typewriter / Courier New / Courier.
-- Alt uden om chatrummet er #000.
-- Verdenen er 1080 × 1920 med et usynligt 9 × 16-grid.
-- Maks. 10 samtidige brugere.
-- Klik på et ledigt felt teleporterer avataren direkte dertil.
-- Beskeder er maks. 140 tegn og vises som bobler i 8 sekunder.
-- `bg.gif` og `avatar.gif` kobles på, når filerne er lagt ind.
+Klik på et ledigt sted, så dukker dit hoved op dér. Ingen gåtur imellem. Når du skriver, står beskeden ved dit hoved i otte sekunder. Den bliver også stående i rummets chatlog, som kan åbnes og trækkes rundt.
 
+På tagene er der også et par ting at opdage. En vej til jazzklubben, en seddel og noget graffiti. Klik på et åbent billede eller hvor som helst omkring det for at lukke det igen.
 
-## Baggrund og ståpladser
+Baggrunde og hoveder er GIF-filer. Et hoved fylder 120 × 120 pixels i en verden på 1080 × 1920 pixels. Hele rummet skaleres til skærmen.
 
-bg.gif (1080 × 1920) og avatar.gif (90 × 90) ligger i public. GIF-filerne er uændrede. Avataren vises i 90 × 90 verdenspixels.
+## Kør det på din egen computer
 
-room-map.json indeholder det usynlige 9 × 16-grid: # blokerer et felt, . tillader det. Første linje er øverst. De to åbne tagflader tillader forhøjninger, undtagen den runde konstruktion og ovenlysvinduet. Tagkanter og området uden for tagene er blokeret. Kortet er tilpasset i trin på 120 pixels, så grænserne er grove. Genstart serveren efter ændringer.
+Du skal have Node.js installeret. Åbn projektmappen i Terminal og kør:
 
-Stop den gamle server med Ctrl+C. Pak denne version ud, åbn mappen i Terminal, kør npm install og npm start. Åbn http://localhost:3000.
+```bash
+npm install
+npm start
+```
 
-## Opdatering: to rum og mobilvisning
+Åbn http://localhost:3000. Lad Terminal være åben, mens serveren kører. Ctrl+C stopper den. To browservinduer kan bruges til at teste med to personer.
 
-- 16 samtidige brugere pr. rum. TAGENE har samme blokeringer som før.
-- JAZZKLUB har separat chatlog og egne ståpladser i jazz-map.json. Alle felter er foreløbigt åbne, da den endelige jazzklub.gif ikke er leveret.
-- Læg jazzklub.gif i public/ for at åbne rum nummer to. Indtil da vises det som utilgængeligt; der bruges ikke en erstatningsbaggrund.
-- Læg avatar1.gif, avatar2.gif osv. i public/. Serveren finder automatisk alle nummererede avatarer ved opstart, også avatar9.gif og senere. En tilfældig avatar tildeles ved indgang og bevares ved rumskift. Hvis ingen nummererede filer findes, bruges avatar.gif.
-- Chatloggen er et flytbart vindue. Træk i CHAT-overskriften med mus eller finger. Luk med ×.
-- Verden og kontroller tilpasses skærmens synlige højde. Talebobler ligger over alle avatarer og holdes indenfor verdenen.
+## Grafik og klikområder
 
-Genstart serveren efter upload af avatarfiler. På Render: upload de ændrede filer til GitHub og deploy den nye commit. Ingen node_modules skal uploades. Build: npm ci. Start: npm start. Behold Free-planen og én serverinstans.
+Grafikken ligger i `public/`:
 
-## Grafisk opdatering: tagene og hotspots
+- `tagene.gif` og `jazzklub.gif`: de to rum.
+- `mand1.gif`, `dame1.gif` og eventuelle `avatar1.gif`, `avatar2.gif` osv.: hoveder, som vælges tilfældigt ved indgang. Flere nummererede filer kan tilføjes; genstart serveren bagefter.
+- `seddel.gif` og `graff.gif`: billederne, man kan åbne på tagene.
+- `tagene_klik.gif`: det skjulte farvekort over tagene.
 
-Avatarerne fylder nu 120 × 120 verdenspixels. De medfølgende mand1.gif og dame1.gif vælges tilfældigt. Nummererede avatar*.gif, mand*.gif og dame*.gif opdages ved serverstart.
+På klik-kortet betyder rødt, at man ikke kan klikke. Gult sender én til jazzklubben. Den øverste lysegrønne markering åbner sedlen, den nederste åbner graffitien. Mørkegrønt og øvrige farver er almindelig tagflade.
 
-Tagene bruger tagene.gif. Klik-kortet tagene_klik.gif er oversat til rooftops-hit-map.json:
-- Rødt afviser klik.
-- Gult skifter til jazzklubben; hvis det er fuldt, bliver brugeren på tagene.
-- Øverste lysegrønne markering åbner seddel.gif.
-- Nederste lysegrønne markering åbner graff.gif.
-- Klik hvor som helst på det åbne billede eller baggrunden lukker det. Escape lukker også.
-- Mørkegrønne tagområder og øvrige farver er almindelige klikområder.
+Serveren bruger `rooftops-hit-map.json`, som er genereret fra klik-kortet. Hvis GIF-kortet ændres, skal JSON-kortet også opdateres. Placeringerne følger stadig et usynligt grid med felter på 120 × 120 pixels; feltets centrum skal være tilladt, og der kan kun stå ét hoved pr. felt. Jazzklubbens felter styres af `jazz-map.json`.
 
-Farverne kontrolleres af serveren. Bevægelse bruger fortsat usynlige 120 × 120-felter og øjeblikkelig teleport. Man placeres kun på felter, hvis centrum er almindelig tagflade, og felter kan ikke deles mellem brugere. Det betyder, at et ellers tilladt klik kan afvises, hvis det pågældende felts centrum er rødt eller en hotspot.
+## Online
 
-Ved ændringer i tagene_klik.gif skal rooftops-hit-map.json regenereres; den medfølgende JSON svarer til den aktuelle vedhæftede GIF. Genstart serveren og genindlæs browseren efter opdatering.
+Projektet bruger Node.js, Express og Socket.IO. På Render oprettes det som en Web Service med `npm ci` som build-kommando og `npm start` som start-kommando. Én serverinstans holder styr på begge rum.
+
+De seneste 50 beskeder gemmes i hvert rum, mens serveren kører. Ved genstart forsvinder chatloggen. Det er stadig et lille eksperiment, og jeg bygger videre på det, efterhånden som jeg får idéer.
+
+— Asmus Helms, 2026
