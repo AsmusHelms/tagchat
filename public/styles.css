@@ -201,3 +201,8 @@ html, body { height: 100%; overflow: hidden; }
 .avatar-inner { width: 100%; height: 100%; }
 .image-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: #000c; cursor: pointer; touch-action: manipulation; }
 .image-overlay img { width: min(600px, calc(100vw - 24px)); max-height: calc(var(--viewport-h,100dvh) - 24px); object-fit: contain; }
+
+.join-card { width: min(600px,100%); container-type: inline-size; }
+.entry-logo { margin: 0 0 16px; white-space: pre; font-family: "Courier New", Courier, monospace; font-size: clamp(3px,2.5cqw,15px); font-weight: normal; line-height: 1.15; text-align: left; color: #fff; }
+
+.help-card { width: min(500px,calc(100vw - 24px)); padding: 24px; background: #fff; color: #000; max-height: calc(var(--viewport-h,100dvh) - 24px); overflow: auto; }

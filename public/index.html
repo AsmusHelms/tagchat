@@ -10,6 +10,13 @@
   <main class="app-shell">
     <section id="entry" class="entry-screen">
       <form id="joinForm" class="join-card" autocomplete="off">
+        <pre class="entry-logo" role="img" aria-label="TAGCHAT — Asmus Helms, 2026">████████╗ █████╗  ██████╗  ██████╗██╗  ██╗ █████╗ ████████╗
+╚══██╔══╝██╔══██╗██╔════╝ ██╔════╝██║  ██║██╔══██╗╚══██╔══╝
+   ██║   ███████║██║  ███╗██║     ███████║███████║   ██║
+   ██║   ██╔══██║██║   ██║██║     ██╔══██║██╔══██║   ██║
+   ██║   ██║  ██║╚██████╔╝╚██████╗██║  ██║██║  ██║   ██║
+   ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
+        ///  ASMUS HELMS • 2026  ///</pre>
         <label for="aliasInput">SKRIV DIT ALIAS</label>
         <input id="aliasInput" maxlength="16" autofocus />
         <button type="submit">GÅ IND</button>
@@ -20,7 +27,7 @@
     <section id="roomScreen" class="room-screen hidden">
       <div class="toolbar">
         <button id="chatToggle" type="button">CHAT</button>
-        <select id="roomSelect" aria-label="Vælg rum"><option value="rooftops">TAGENE</option></select>
+        <span id="roomName">TAGENE</span>
         <span id="presence">0 / 16</span>
       </div>
 
@@ -46,6 +53,7 @@
   </main>
 
   <div id="imageOverlay" class="image-overlay hidden" role="dialog" aria-modal="true" aria-label="Billede — klik for at lukke" tabindex="-1"><img id="overlayImage" alt="Billede fra rummet" /></div>
+  <div id="helpOverlay" class="image-overlay hidden" role="dialog" aria-modal="true" aria-label="Hjælp" tabindex="-1"><article class="help-card"><h1>HJÆLP</h1><p>Hjælpeteksten kommer snart.</p><p>Klik hvor som helst for at lukke.</p></article></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>
