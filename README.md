@@ -38,11 +38,11 @@ npm start
 Grafikken ligger i `public/`:
 
 - `tagene.gif` og `jazzklub.gif`: de to rum.
-- `mand1.gif`, `dame1.gif` og eventuelle `avatar1.gif`, `avatar2.gif` osv.: hoveder, som vælges tilfældigt ved indgang. Flere nummererede filer kan tilføjes; genstart serveren bagefter.
-- `seddel.gif` og `graff.gif`: billederne, man kan åbne på tagene.
+- `avatar1.gif`, `avatar2.gif`, `avatar3.gif` osv.: hoveder, som vælges tilfældigt ved indgang. Flere nummererede filer kan tilføjes; genstart serveren bagefter.
+- `seddel.gif`, `seddel2.gif` og `graff.gif`: billederne, man kan åbne på tagene.
 - `tagene_klik.gif`: det skjulte farvekort over tagene.
 
-På klik-kortet betyder rødt, at man ikke kan klikke. Gult sender én til jazzklubben. Den øverste lysegrønne markering åbner sedlen, den nederste åbner graffitien. Mørkegrønt og øvrige farver er almindelig tagflade.
+På klik-kortet betyder rødt, at man ikke kan klikke. Gult sender én til jazzklubben. Det lysegrønne felt øverst til højre åbner seddel2, feltet ved den runde konstruktion åbner sedlen, og det nederste åbner graffitien. Mørkegrønt og øvrige farver er almindelig tagflade.
 
 Serveren bruger `rooftops-hit-map.json`, som er genereret fra klik-kortet. Hvis GIF-kortet ændres, skal JSON-kortet også opdateres. Placeringerne følger stadig et usynligt grid med felter på 120 × 120 pixels; feltets centrum skal være tilladt, og der kan kun stå ét hoved pr. felt. Jazzklubbens felter styres af `jazz-map.json`.
 
@@ -53,3 +53,7 @@ Projektet bruger Node.js, Express og Socket.IO. På Render oprettes det som en W
 De seneste 50 beskeder gemmes i hvert rum, mens serveren kører. Ved genstart forsvinder chatloggen. Det er stadig et lille eksperiment, og jeg bygger videre på det, efterhånden som jeg får idéer.
 
 — Asmus Helms, 2026
+
+Rumskift sker kun ved at klikke på overgange: gult på tagene og døren øverst til højre i klubben. Skriv `/help` for at åbne hjælp (teksten kommer senere). Kommandoen vises ikke i chatloggen. Efter afbrudt forbindelse kommer man ind på tagene igen.
+
+Efter ændringer i klik-kortet: kør `python3 scripts/build_hit_map.py` (kræver Pillow), og genstart serveren.

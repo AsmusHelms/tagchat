@@ -30,7 +30,7 @@ const hitRows = hitMap.rows.map(runs => {
 function hit(px,py) { return hitRows[py]?.[px] ?? 1; }
 rooms.get('rooftops').blocked = new Set();
 for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(hit(x*120+60,y*120+60)!==0)rooms.get('rooftops').blocked.add(`${x},${y}`);
-const avatarFiles = fs.readdirSync(path.join(dir, 'public')).filter(f => /^(?:avatar|mand|dame)[1-9]\d*\.gif$/.test(f));
+const avatarFiles = fs.readdirSync(path.join(dir, 'public')).filter(f => /^avatar[1-9]\d*\.gif$/.test(f));
 const looks = avatarFiles.length ? avatarFiles : ['avatar.gif'];
 function available(id) { const r = rooms.get(id); return r && fs.existsSync(path.join(dir, 'public', r.background)); }
 function members(id) { return [...users.values()].filter(u => u.roomId === id); }
@@ -58,7 +58,7 @@ app.use(express.static(path.join(dir,'public')));
 io.on('connection',socket=>{
   socket.emit('rooms',catalog());
   socket.on('join',(raw,cb=()=>{})=>{const alias=String(raw||'').trim().slice(0,16);if(!alias)return cb({ok:false,error:'Skriv et alias.'});enter(socket,'rooftops',alias,cb);});
-  socket.on('room:change',(id,cb=()=>{})=>{if(!users.has(socket.id))return cb({ok:false});enter(socket,id,null,cb);});
+  
   socket.on('move',(cell,cb=()=>{})=>{
     const u=users.get(socket.id);if(!u)return cb({ok:false});
     let {x,y,px,py}=cell||{};
@@ -67,7 +67,12 @@ io.on('connection',socket=>{
       const action=hit(px,py);
       if(action===1)return cb({ok:false});
       if(action===2)return enter(socket,'jazz',null,cb);
-      if(action===3||action===4)return cb({ok:true,overlay:action===3?'/seddel.gif':'/graff.gif'});
+      if([3,4,5].includes(action))return cb({ok:true,overlay:({3:'/seddel.gif',4:'/graff.gif',5:'/seddel2.gif'})[action]});
+      x=Math.floor(px/120);y=Math.floor(py/120);
+    }
+    if(u.roomId==='jazz') {
+      if(!Number.isInteger(px)||!Number.isInteger(py)||px<0||px>=1080||py<0||py>=1920)return cb({ok:false});
+      if(px>=948&&px<=1035&&py>=270&&py<=455)return enter(socket,'rooftops',null,cb);
       x=Math.floor(px/120);y=Math.floor(py/120);
     }
     if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||x>=COLS||y<0||y>=ROWS||rooms.get(u.roomId).blocked.has(`${x},${y}`)||occupied(u.roomId,x,y,u.id))return cb({ok:false});
@@ -75,6 +80,7 @@ io.on('connection',socket=>{
   });
   socket.on('message:send',(raw,cb=()=>{})=>{
     const u=users.get(socket.id);const text=String(raw||'').trim().slice(0,140);if(!u||!text)return cb({ok:false});
+    if(text.toLowerCase()==='/help')return cb({ok:true,help:true});
     const m={id:randomUUID(),userId:u.id,alias:u.alias,text,timestamp:Date.now()};const log=rooms.get(u.roomId).messages;
     log.push(m);if(log.length>50)log.shift();io.to(u.roomId).emit('message:new',m);cb({ok:true});
   });
