@@ -39,6 +39,7 @@ Historikken beskriver de leverede projektversioner og forberedelsen til hosting 
 | Før ASCII-logoet — præcis dato ikke registreret | Klik-kort og større avatarer | Avatarstørrelse på 120 × 120 pixels. Ny tagbaggrund, farvekort med blokerede områder, overgang til jazzklubben og billedområder til `seddel.gif` og `graff.gif`. Tilfældige looks fra `mand1.gif` og `dame1.gif`. |
 | 6. oktober 2026 | Logo, README og klikområder | ASCII-logo over aliasfeltet og i README. Introduktion skrevet fra mig til andre. Opdateret klik-kort med større områder til rumskift og billeder. |
 | 8. oktober 2026 | Nye grafikker, overgange og hjælp | Nye tag- og klubbaggrunde. De gamle avatarer erstattet af `avatar1.gif`–`avatar3.gif`. Dropdown fjernet; rumskift via gult felt på tagene og døren øverst til højre i klubben. Nyt område til `seddel2.gif`. `/help` åbner en foreløbig tekst uden at blive sendt til chatloggen. |
+| 11. oktober 2026 | Justering af design | Lysegrå panelflader erstattet af sort. Tyndere skillelinjer, færre rammer, orange handlinger og cyan labels. Ingen ændring af illustrationer eller funktioner. |
 | 11. oktober 2026 | Design og interface | Samlet designsystem med 28 MS Paint-farver, hardwareinspirerede knapper og paneler, tekniske labels og forbindelsesstatus. Responsivt layout, fokusmarkeringer og ensartede fejl- og hjælppaneler. Illustrationer og funktioner bevaret. |
 | 9. oktober 2026 | Dokumentation | README gjort mere nøgtern. Versionshistorik tilføjet, og vejledninger samlet. Ingen ændringer i funktionerne. |
 
@@ -102,7 +103,7 @@ Der er endnu ingen brugerregistrering, vedvarende historik eller særskilt spam-
 
 ## Designsystem — 11. oktober 2026
 
-Webinterfacet bruger en hardwareinspireret ramme med reference til CASIO, klassisk Nintendo-hardware og Teenage Engineering. Sort, hvid og grå er grundfarver; gul markerer centrale handlinger. Grøn og rød anvendes til forbindelsesstatus. Firkantede knapper har tydelige kanter og en kort fysisk forskydning ved tryk. Der bruges ingen gradients eller gennemsigtige farvelag.
+Webinterfacet bruger en hardwareinspireret ramme med reference til CASIO og klassisk Nintendo-hardware. Sort er den gennemgående baggrund, hvid bruges til tekst og grå til fine skillelinjer. Orange markerer centrale handlinger, cyan bruges til tekniske labels, og gul til hover på primære knapper. Grøn og rød anvendes til forbindelsesstatus. Firkantede knapper har tynde kanter og en kort forskydning ved tryk. Paneler har ingen dekorative slagskygger. Der bruges ingen gradients eller gennemsigtige farvelag.
 
 Alle UI-farver hentes fra de 28 globale CSS-variabler `--paint-01` til `--paint-28` i `public/styles.css`. Semantiske variabler (`--surface`, `--ink`, `--paper`, `--muted`, `--accent`, `--error`) henviser til paletten. Browserens antialiasing af tekst og illustrationernes egne farver er ikke del af CSS-paletten.
 
@@ -128,3 +129,13 @@ Courier New/Courier bruges til logo, tekniske labels, status og kontroller. Aria
 Genbrugelige styles omfatter knapper og inputfelter, `.machine-label`, `.toolbar`, `.connection`, `.chat-panel`, `.chat-header`, `.error`, `.room-error`, `.image-overlay` og `.help-card`. Tastaturfokus markeres med palettens himmelblå. Knapper har en minimumshøjde på 44 pixels. Fejltekst vises i eksisterende live-regioner.
 
 Spilfladen bevarer 9:16-proportionerne. Den eksisterende ResizeObserver skalerer fladen, og klik omregnes fortsat til 1080 × 1920 verdenskoordinater. Avatarer, overgange, kommandoer og billedområder er bevaret. Der er ingen dropdown-navigation. Alle GIF-filer er bevaret uændrede i denne designopdatering.
+
+
+
+## Opdatering — 11. oktober 2026: rumplacering og loading
+
+Klubbens tidligere helt åbne grid er erstattet med et konservativt kort, som blokerer scenen, baren, møbler og yderkanter. Blokeringerne følger 120-pixel-felter og er derfor grove. Serverens fælles `walkable`-kontrol bruges både til klik og valg af startfelt ved indgang og rumskift.
+
+Teksten om to rum og 16 personer er fjernet fra indgangsskærmen. En enkel loading-side vises ved første forbindelse og indlæsning af baggrund ved rumskift. En fejl ved forbindelse viser en mulighed for at prøve igen. Baggrundsindlæsning har en timeout på otte sekunder. Ingen nye afhængigheder.
+
+Det vedhæftede ASCII-loading-artwork er indsat med skyline, TAGCHAT-logo og byline. `public/loading-art.js` genererer motivet og skalerer hele kompositionen samlet fra 740 × 642 pixels efter den tilgængelige bredde og højde. Ingen vandret scrolling eller ændring af motivets interne placeringer. På smalle skærme bliver ASCII-detaljerne tilsvarende mindre. Statusfeltet viser den faktiske forbindelse eller indlæsning; tegnene er dekorative og viser ikke en procentvis fremdrift. Ingen nye afhængigheder.

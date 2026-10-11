@@ -36,9 +36,12 @@ function available(id) { const r = rooms.get(id); return r && fs.existsSync(path
 function members(id) { return [...users.values()].filter(u => u.roomId === id); }
 function catalog() { return [...rooms].map(([id,r]) => ({ id, name:r.name, available:!!available(id), count:members(id).length, max:MAX_USERS })); }
 function occupied(id,x,y,ignore) { return members(id).some(u => u.id !== ignore && u.x===x && u.y===y); }
+function walkable(id,x,y) {
+  return Number.isInteger(x)&&Number.isInteger(y)&&x>=0&&x<COLS&&y>=0&&y<ROWS&&!rooms.get(id).blocked.has(`${x},${y}`);
+}
 function openCell(id) {
   const cells=[];
-  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++) if(!rooms.get(id).blocked.has(`${x},${y}`)&&!occupied(id,x,y)) cells.push({x,y});
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++) if(walkable(id,x,y)&&!occupied(id,x,y)) cells.push({x,y});
   return cells[Math.floor(Math.random()*cells.length)];
 }
 function state(id) { const r=rooms.get(id);return {roomId:id, background:r.background, users:members(id),blockedCells:[...r.blocked],messages:r.messages,rooms:catalog()}; }
@@ -75,7 +78,7 @@ io.on('connection',socket=>{
       if(px>=948&&px<=1035&&py>=270&&py<=455)return enter(socket,'rooftops',null,cb);
       x=Math.floor(px/120);y=Math.floor(py/120);
     }
-    if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||x>=COLS||y<0||y>=ROWS||rooms.get(u.roomId).blocked.has(`${x},${y}`)||occupied(u.roomId,x,y,u.id))return cb({ok:false});
+    if(!walkable(u.roomId,x,y)||occupied(u.roomId,x,y,u.id))return cb({ok:false});
     Object.assign(u,{x,y});io.to(u.roomId).emit('user:moved',{id:u.id,x,y});cb({ok:true});
   });
   socket.on('message:send',(raw,cb=()=>{})=>{
