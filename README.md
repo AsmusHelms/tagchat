@@ -136,6 +136,6 @@ Spilfladen bevarer 9:16-proportionerne. Den eksisterende ResizeObserver skalerer
 
 Klubbens tidligere helt åbne grid er erstattet med et konservativt kort, som blokerer scenen, baren, møbler og yderkanter. Blokeringerne følger 120-pixel-felter og er derfor grove. Serverens fælles `walkable`-kontrol bruges både til klik og valg af startfelt ved indgang og rumskift.
 
-Teksten om to rum og 16 personer er fjernet fra indgangsskærmen. En enkel loading-side vises ved første forbindelse og indlæsning af baggrund ved rumskift. En fejl ved forbindelse viser en mulighed for at prøve igen. Baggrundsindlæsning har en timeout på otte sekunder. Ingen nye afhængigheder.
+Teksten om to rum og 16 personer er fjernet fra indgangsskærmen. Loading-siden vises kun ved første åbning af siden og bliver stående i mindst ét sekund, også hvis forbindelsen er klar tidligere. Rumskift og genforbindelse efter indgang viser ikke loading-skærmen. En fejl ved forbindelse viser en mulighed for at prøve igen. Ingen nye afhængigheder.
 
 Det vedhæftede ASCII-loading-artwork er indsat med skyline, TAGCHAT-logo og byline. `public/loading-art.js` genererer motivet og skalerer hele kompositionen samlet fra 740 × 642 pixels efter den tilgængelige bredde og højde. Ingen vandret scrolling eller ændring af motivets interne placeringer. På smalle skærme bliver ASCII-detaljerne tilsvarende mindre. Statusfeltet viser den faktiske forbindelse eller indlæsning; tegnene er dekorative og viser ikke en procentvis fremdrift. Ingen nye afhængigheder.
