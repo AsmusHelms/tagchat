@@ -118,3 +118,20 @@ input::placeholder { color: var(--muted); opacity: 1; }
 .chat-header strong { font-weight: normal; color: var(--paint-20); }
 .chat-line strong { color: var(--paint-20); }
 .counter { color: var(--paint-16); }
+
+.loading-screen { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; background: var(--paint-01); color: var(--paint-15); padding: 24px; }
+.loading-content { width: min(480px,100%); }
+.loading-content p { color: var(--paint-20); font: 14px var(--mono); }
+
+/* ASCII loading artwork: fixed 740 × 642 composition, uniformly scaled. */
+.loading-screen { padding: 16px; overflow: auto; }
+.loading-art-shell { width: min(740px,100%); display: grid; gap: 12px; }
+.loading-art-frame { position: relative; overflow: hidden; }
+.loading-scene { position: absolute; left: 0; top: 0; width: 740px; height: 642px; transform-origin: top left; background: var(--paint-01); border: 1px solid var(--paint-02); overflow: hidden; }
+.loading-scene pre { margin: 0; font-family: "Courier New", Courier, monospace; font-size: 10px; line-height: 1.03; letter-spacing: 0; white-space: pre; }
+#loadingSkyline { width: max-content; margin: 0 auto; color: var(--paint-02); }
+.loading-brand { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); background: var(--paint-01); padding: 12px 14px; border: 1px solid var(--paint-02); text-align: center; z-index: 2; }
+.loading-brand pre { font-size: 10px; line-height: 1.15; color: var(--paint-15); }
+.loading-byline { color: var(--paint-28); font-size: 12px; margin-top: 10px; white-space: pre; }
+.loading-art-status { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: max-content; max-width: 700px; background: var(--paint-01); padding: 9px 14px; color: var(--paint-20); font-size: 11px; border: 1px solid var(--paint-02); text-align: center; }
+.loading-signal { color: var(--paint-28); }

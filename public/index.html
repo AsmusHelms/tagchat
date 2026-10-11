@@ -7,8 +7,24 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <section id="loadingScreen" class="loading-screen" role="status" aria-live="polite">
+    <div class="loading-art-shell">
+      <header class="machine-label"><span>TAGCHAT / SYSTEM BOOT</span><span>© 2026</span></header>
+      <div id="loadingArtFrame" class="loading-art-frame"><div class="loading-scene"><pre id="loadingSkyline" aria-label="ASCII-udsigt over New Yorks tage"></pre>
+<div class="loading-brand"><pre>████████╗ █████╗  ██████╗  ██████╗██╗  ██╗ █████╗ ████████╗
+╚══██╔══╝██╔══██╗██╔════╝ ██╔════╝██║  ██║██╔══██╗╚══██╔══╝
+   ██║   ███████║██║  ███╗██║     ███████║███████║   ██║
+   ██║   ██╔══██║██║   ██║██║     ██╔══██║██╔══██║   ██║
+   ██║   ██║  ██║╚██████╔╝╚██████╗██║  ██║██║  ██║   ██║
+   ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝</pre>
+<div class="loading-byline">///  ASMUS HELMS • 2026  ///</div></div>
+<div class="loading-art-status"><span id="loadingText">Forbinder…</span><span class="loading-signal" aria-hidden="true"> ░░░░░</span></div>
+</div></div>
+      <button id="loadingRetry" class="hidden" type="button">PRØV IGEN</button>
+    </div>
+  </section>
   <main class="app-shell">
-    <section id="entry" class="entry-screen">
+    <section id="entry" class="entry-screen hidden">
       <form id="joinForm" class="join-card" autocomplete="off">
         <div class="machine-label"><span>TAGCHAT / SOCIAL TERMINAL</span><span>V1 · 2026</span></div>
         <pre class="entry-logo" role="img" aria-label="TAGCHAT — Asmus Helms, 2026">████████╗ █████╗  ██████╗  ██████╗██╗  ██╗ █████╗ ████████╗
@@ -18,7 +34,6 @@
    ██║   ██║  ██║╚██████╔╝╚██████╗██║  ██║██║  ██║   ██║
    ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
         ///  ASMUS HELMS • 2026  ///</pre>
-        <div class="entry-description">To rum. Op til 16 personer i hvert.</div>
         <label for="aliasInput">01 / SKRIV DIT ALIAS</label>
         <input id="aliasInput" maxlength="16" required autofocus />
         <button type="submit">GÅ IND</button>
@@ -59,6 +74,7 @@
 
   <div id="imageOverlay" class="image-overlay hidden" role="dialog" aria-modal="true" aria-label="Billede — klik for at lukke" tabindex="-1"><img id="overlayImage" alt="Billede fra rummet" /></div>
   <div id="helpOverlay" class="image-overlay hidden" role="dialog" aria-modal="true" aria-label="Hjælp" tabindex="-1"><article class="help-card"><div class="machine-label">SYSTEM / 01</div><h1>HJÆLP</h1><p>Hjælpeteksten kommer snart.</p><p>Klik hvor som helst for at lukke.</p></article></div>
+  <script src="loading-art.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>

@@ -23,8 +23,8 @@ function renderUser(u){let r=users.get(u.id);if(!r){
 }
 function removeUser(id){const r=users.get(id);if(!r)return;r.el.remove();r.bubble.remove();users.delete(id);clearTimeout(timers.get(id));timers.delete(id);}
 function chatLine(m){const line=document.createElement('div');line.className='chat-line';const a=document.createElement('strong');a.textContent=m.alias+': ';line.append(a,document.createTextNode(m.text));$('chatLog').append(line);while($('chatLog').children.length>50)$('chatLog').firstChild.remove();$('chatLog').scrollTop=$('chatLog').scrollHeight;}
-function applyState(response){selfId=response.selfId;const s=response.state;roomId=s.roomId;[...users.keys()].forEach(removeUser);$('chatLog').replaceChildren();blocked=new Set(s.blockedCells);world.style.backgroundImage=`url("${s.background}")`;s.users.forEach(renderUser);s.messages.forEach(chatLine);$('roomName').textContent=roomId==='jazz'?'JAZZKLUB':'TAGENE';$('presence').textContent=`${s.users.length} / 16`;}
-$('joinForm').addEventListener('submit',e=>{e.preventDefault();rememberedAlias=$('aliasInput').value.trim().slice(0,16);socket.emit('join',rememberedAlias,r=>{if(!r?.ok){$('joinError').textContent=r?.error||'Kunne ikke gå ind.';return;}applyState(r);$('entry').classList.add('hidden');$('roomScreen').classList.remove('hidden');viewport();});});
+async function applyState(response){selfId=response.selfId;const s=response.state;roomId=s.roomId;showLoading('Indlæser rum…');await preload(s.background);[...users.keys()].forEach(removeUser);$('chatLog').replaceChildren();blocked=new Set(s.blockedCells);world.style.backgroundImage=`url("${s.background}")`;s.users.forEach(renderUser);s.messages.forEach(chatLine);$('roomName').textContent=roomId==='jazz'?'JAZZKLUB':'TAGENE';$('presence').textContent=`${s.users.length} / 16`;hideLoading();}
+$('joinForm').addEventListener('submit',e=>{e.preventDefault();rememberedAlias=$('aliasInput').value.trim().slice(0,16);socket.emit('join',rememberedAlias,async r=>{if(!r?.ok){$('joinError').textContent=r?.error||'Kunne ikke gå ind.';return;}await applyState(r);$('entry').classList.add('hidden');$('roomScreen').classList.remove('hidden');viewport();});});
 const imageOverlay=$('imageOverlay'), overlayImage=$('overlayImage');
 function closeOverlay(){imageOverlay.classList.add('hidden');overlayImage.removeAttribute('src');}
 function openOverlay(src){overlayImage.src=src;imageOverlay.classList.remove('hidden');imageOverlay.focus();}
@@ -33,8 +33,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay();});
 world.addEventListener('click',e=>{
  if(!selfId||!socket.connected)return;
  const r=world.getBoundingClientRect();const px=Math.min(1079,Math.max(0,Math.floor((e.clientX-r.left)/r.width*1080))),py=Math.min(1919,Math.max(0,Math.floor((e.clientY-r.top)/r.height*1920)));
- socket.emit('move',{x:Math.floor(px/120),y:Math.floor(py/120),px,py},response=>{
-   if(response?.state){closeOverlay();applyState(response);$('roomError').textContent='';}
+ socket.emit('move',{x:Math.floor(px/120),y:Math.floor(py/120),px,py},async response=>{
+   if(response?.state){closeOverlay();await applyState(response);$('roomError').textContent='';}
    else if(response?.overlay)openOverlay(response.overlay);
    else if(response?.error)$('roomError').textContent=response.error;
  });
@@ -44,7 +44,7 @@ $('messageForm').addEventListener('submit',e=>{e.preventDefault();const t=$('mes
 socket.on('user:joined',renderUser);socket.on('user:moved',u=>{const r=users.get(u.id);if(r)renderUser({...r,...u});});socket.on('user:left',u=>removeUser(u.id));socket.on('presence',p=>{$('presence').textContent=`${p.count} / ${p.max}`;});
 socket.on('message:new',m=>{chatLine(m);const u=users.get(m.userId);if(!u)return;u.bubble.textContent=m.text;u.bubble.hidden=false;positionBubble(u);clearTimeout(timers.get(u.id));timers.set(u.id,setTimeout(()=>{u.bubble.hidden=true;},8000));});
 socket.on('disconnect',()=>{$('connectionStatus').textContent='OFFLINE';$('connectionStatus').classList.add('offline');if(selfId)$('roomError').textContent='Forbindelsen er afbrudt. Forbinder igen…';});
-socket.on('connect',()=>{$('connectionStatus').textContent='ONLINE';$('connectionStatus').classList.remove('offline');if(!selfId)return;socket.emit('join',rememberedAlias,r=>{if(!r?.ok){selfId=null;$('roomScreen').classList.add('hidden');$('entry').classList.remove('hidden');$('joinError').textContent=r?.error||'Kunne ikke genoprette forbindelsen.';return;}applyState(r);$('roomError').textContent='';});});
+socket.on('connect',()=>{$('connectionStatus').textContent='ONLINE';$('connectionStatus').classList.remove('offline');if(!selfId){$('entry').classList.remove('hidden');hideLoading();return;}socket.emit('join',rememberedAlias,async r=>{if(!r?.ok){selfId=null;$('roomScreen').classList.add('hidden');$('entry').classList.remove('hidden');$('joinError').textContent=r?.error||'Kunne ikke genoprette forbindelsen.';hideLoading();return;}applyState(r);$('roomError').textContent='';});});
 const panel=$('chatPanel');let placed=false, drag=null;
 function clampPanel(){if(!placed)return;const v=window.visualViewport;const w=v?.width||innerWidth,h=v?.height||innerHeight,top=v?.offsetTop||0,left=v?.offsetLeft||0;panel.style.left=`${Math.max(left+6,Math.min(parseFloat(panel.style.left)||0,left+w-panel.offsetWidth-6))}px`;panel.style.top=`${Math.max(top+6,Math.min(parseFloat(panel.style.top)||0,top+h-panel.offsetHeight-6))}px`;}
 $('chatToggle').addEventListener('click',()=>{panel.setAttribute('aria-hidden','false');if(!placed){panel.style.left='12px';panel.style.top=`${(window.visualViewport?.offsetTop||0)+60}px`;placed=true;}clampPanel();$('chatLog').scrollTop=$('chatLog').scrollHeight;});$('chatClose').addEventListener('click',()=>panel.setAttribute('aria-hidden','true'));
@@ -60,3 +60,9 @@ window.addEventListener('resize',viewport);window.visualViewport?.addEventListen
 function closeHelp(){$('helpOverlay').classList.add('hidden');}
 $('helpOverlay').addEventListener('click',closeHelp);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp();});
+
+function showLoading(text){$('loadingText').textContent=text;$('loadingScreen').classList.remove('hidden');}
+function hideLoading(){$('loadingScreen').classList.add('hidden');$('loadingRetry').classList.add('hidden');}
+function preload(src){return new Promise(resolve=>{const img=new Image();const done=()=>{clearTimeout(timeout);resolve();};const timeout=setTimeout(done,8000);img.onload=done;img.onerror=done;img.src=src;});}
+socket.on('connect_error',()=>{if(!selfId){showLoading('Kunne ikke forbinde. Serveren kan være ved at starte.');$('loadingRetry').classList.remove('hidden');}});
+$('loadingRetry').addEventListener('click',()=>{showLoading('Forbinder…');socket.connect();});
