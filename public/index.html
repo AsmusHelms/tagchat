@@ -10,6 +10,7 @@
   <main class="app-shell">
     <section id="entry" class="entry-screen">
       <form id="joinForm" class="join-card" autocomplete="off">
+        <div class="machine-label"><span>TAGCHAT / SOCIAL TERMINAL</span><span>V1 · 2026</span></div>
         <pre class="entry-logo" role="img" aria-label="TAGCHAT — Asmus Helms, 2026">████████╗ █████╗  ██████╗  ██████╗██╗  ██╗ █████╗ ████████╗
 ╚══██╔══╝██╔══██╗██╔════╝ ██╔════╝██║  ██║██╔══██╗╚══██╔══╝
    ██║   ███████║██║  ███╗██║     ███████║███████║   ██║
@@ -17,8 +18,9 @@
    ██║   ██║  ██║╚██████╔╝╚██████╗██║  ██║██║  ██║   ██║
    ╚═╝   ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝
         ///  ASMUS HELMS • 2026  ///</pre>
-        <label for="aliasInput">SKRIV DIT ALIAS</label>
-        <input id="aliasInput" maxlength="16" autofocus />
+        <div class="entry-description">To rum. Op til 16 personer i hvert.</div>
+        <label for="aliasInput">01 / SKRIV DIT ALIAS</label>
+        <input id="aliasInput" maxlength="16" required autofocus />
         <button type="submit">GÅ IND</button>
         <p id="joinError" class="error" aria-live="polite"></p>
       </form>
@@ -26,9 +28,11 @@
 
     <section id="roomScreen" class="room-screen hidden">
       <div class="toolbar">
+        <span class="machine-title">TAGCHAT <small>V1</small></span>
         <button id="chatToggle" type="button">CHAT</button>
         <span id="roomName">TAGENE</span>
-        <span id="presence">0 / 16</span>
+        <span class="connection" id="connectionStatus" role="status">FORBINDER</span>
+        <span id="presence" aria-label="Antal brugere i rummet">0 / 16</span>
       </div>
 
       <div class="world-wrap">
@@ -37,6 +41,7 @@
 
       <p id="roomError" class="room-error" aria-live="polite"></p>
       <form id="messageForm" class="message-form" autocomplete="off">
+        <label class="input-label" for="messageInput">TX / BESKED</label>
         <input id="messageInput" maxlength="140" placeholder="Skriv noget..." />
         <button type="submit">SEND</button>
         <div id="counter" class="counter">0 / 140</div>
@@ -44,7 +49,7 @@
 
       <aside id="chatPanel" class="chat-panel" aria-label="Chatlog" aria-hidden="true">
         <div class="chat-header">
-          <strong>CHAT</strong>
+          <strong>CHAT / LOG</strong>
           <button id="chatClose" type="button" aria-label="Luk chat">×</button>
         </div>
         <div id="chatLog" class="chat-log"></div>
@@ -53,7 +58,7 @@
   </main>
 
   <div id="imageOverlay" class="image-overlay hidden" role="dialog" aria-modal="true" aria-label="Billede — klik for at lukke" tabindex="-1"><img id="overlayImage" alt="Billede fra rummet" /></div>
-  <div id="helpOverlay" class="image-overlay hidden" role="dialog" aria-modal="true" aria-label="Hjælp" tabindex="-1"><article class="help-card"><h1>HJÆLP</h1><p>Hjælpeteksten kommer snart.</p><p>Klik hvor som helst for at lukke.</p></article></div>
+  <div id="helpOverlay" class="image-overlay hidden" role="dialog" aria-modal="true" aria-label="Hjælp" tabindex="-1"><article class="help-card"><div class="machine-label">SYSTEM / 01</div><h1>HJÆLP</h1><p>Hjælpeteksten kommer snart.</p><p>Klik hvor som helst for at lukke.</p></article></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>
