@@ -2,6 +2,8 @@ const socket = io();
 const $ = id => document.getElementById(id);
 const world=$('world'), users=new Map(), timers=new Map();
 let selfId=null, roomId='rooftops', blocked=new Set(), rememberedAlias='';
+const bootStarted=performance.now();
+let bootComplete=false, bootTimer;
 function viewport(){const v=window.visualViewport;document.documentElement.style.setProperty('--viewport-h',`${v?.height||innerHeight}px`);document.documentElement.style.setProperty('--viewport-top',`${v?.offsetTop||0}px`);clampPanel();}
 function positionBubble(u){
   if(u.bubble.hidden)return;
@@ -23,7 +25,7 @@ function renderUser(u){let r=users.get(u.id);if(!r){
 }
 function removeUser(id){const r=users.get(id);if(!r)return;r.el.remove();r.bubble.remove();users.delete(id);clearTimeout(timers.get(id));timers.delete(id);}
 function chatLine(m){const line=document.createElement('div');line.className='chat-line';const a=document.createElement('strong');a.textContent=m.alias+': ';line.append(a,document.createTextNode(m.text));$('chatLog').append(line);while($('chatLog').children.length>50)$('chatLog').firstChild.remove();$('chatLog').scrollTop=$('chatLog').scrollHeight;}
-async function applyState(response){selfId=response.selfId;const s=response.state;roomId=s.roomId;showLoading('Indlæser rum…');await preload(s.background);[...users.keys()].forEach(removeUser);$('chatLog').replaceChildren();blocked=new Set(s.blockedCells);world.style.backgroundImage=`url("${s.background}")`;s.users.forEach(renderUser);s.messages.forEach(chatLine);$('roomName').textContent=roomId==='jazz'?'JAZZKLUB':'TAGENE';$('presence').textContent=`${s.users.length} / 16`;hideLoading();}
+async function applyState(response){selfId=response.selfId;const s=response.state;roomId=s.roomId;[...users.keys()].forEach(removeUser);$('chatLog').replaceChildren();blocked=new Set(s.blockedCells);world.style.backgroundImage=`url("${s.background}")`;s.users.forEach(renderUser);s.messages.forEach(chatLine);$('roomName').textContent=roomId==='jazz'?'JAZZKLUB':'TAGENE';$('presence').textContent=`${s.users.length} / 16`;}
 $('joinForm').addEventListener('submit',e=>{e.preventDefault();rememberedAlias=$('aliasInput').value.trim().slice(0,16);socket.emit('join',rememberedAlias,async r=>{if(!r?.ok){$('joinError').textContent=r?.error||'Kunne ikke gå ind.';return;}await applyState(r);$('entry').classList.add('hidden');$('roomScreen').classList.remove('hidden');viewport();});});
 const imageOverlay=$('imageOverlay'), overlayImage=$('overlayImage');
 function closeOverlay(){imageOverlay.classList.add('hidden');overlayImage.removeAttribute('src');}
@@ -61,8 +63,16 @@ function closeHelp(){$('helpOverlay').classList.add('hidden');}
 $('helpOverlay').addEventListener('click',closeHelp);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHelp();});
 
-function showLoading(text){$('loadingText').textContent=text;$('loadingScreen').classList.remove('hidden');}
-function hideLoading(){$('loadingScreen').classList.add('hidden');$('loadingRetry').classList.add('hidden');}
-function preload(src){return new Promise(resolve=>{const img=new Image();const done=()=>{clearTimeout(timeout);resolve();};const timeout=setTimeout(done,8000);img.onload=done;img.onerror=done;img.src=src;});}
-socket.on('connect_error',()=>{if(!selfId){showLoading('Kunne ikke forbinde. Serveren kan være ved at starte.');$('loadingRetry').classList.remove('hidden');}});
+function showLoading(text){if(bootComplete)return;clearTimeout(bootTimer);$('loadingText').textContent=text;$('loadingScreen').classList.remove('hidden');}
+function hideLoading(){
+ if(bootComplete)return;
+ clearTimeout(bootTimer);
+ bootTimer=setTimeout(()=>{
+  if(!socket.connected)return;
+  bootComplete=true;
+  $('loadingScreen').classList.add('hidden');
+  $('loadingRetry').classList.add('hidden');
+ },Math.max(0,1000-(performance.now()-bootStarted)));
+}
+socket.on('connect_error',()=>{if(!selfId&&!bootComplete){showLoading('Kunne ikke forbinde. Serveren kan være ved at starte.');$('loadingRetry').classList.remove('hidden');}});
 $('loadingRetry').addEventListener('click',()=>{showLoading('Forbinder…');socket.connect();});
