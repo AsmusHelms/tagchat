@@ -62,7 +62,7 @@ Filerne ligger i `public/`:
 | --- | --- |
 | `tagene.gif` | Baggrund til tagene. |
 | `jazzklub.gif` | Baggrund til jazzklubben. |
-| `avatar1.gif`, `avatar2.gif`, `avatar3.gif` osv. | Tilfældige avatarlooks. Flere nummererede filer opdages ved serverstart. |
+| `avatar1.gif`, `avatar2.gif`, `avatar3.gif`, `avatar4.gif` osv. | Tilfældige avatarlooks. Flere nummererede filer opdages ved serverstart. |
 | `seddel.gif`, `seddel2.gif`, `graff.gif` | Billeder, som åbnes fra tagene. |
 | `tagene_klik.gif` | Skjult farvekort med klikområder. |
 
@@ -139,3 +139,8 @@ Klubbens tidligere helt åbne grid er erstattet med et konservativt kort, som bl
 Teksten om to rum og 16 personer er fjernet fra indgangsskærmen. Loading-siden vises kun ved første åbning af siden og bliver stående i mindst ét sekund, også hvis forbindelsen er klar tidligere. Rumskift og genforbindelse efter indgang viser ikke loading-skærmen. En fejl ved forbindelse viser en mulighed for at prøve igen. Ingen nye afhængigheder.
 
 Det vedhæftede ASCII-loading-artwork er indsat med skyline, TAGCHAT-logo og byline. `public/loading-art.js` genererer motivet og skalerer hele kompositionen samlet fra 740 × 642 pixels efter den tilgængelige bredde og højde. Ingen vandret scrolling eller ændring af motivets interne placeringer. På smalle skærme bliver ASCII-detaljerne tilsvarende mindre. Statusfeltet viser den faktiske forbindelse eller indlæsning; tegnene er dekorative og viser ikke en procentvis fremdrift. Ingen nye afhængigheder.
+
+
+## Grafikopdatering — 12. oktober 2026
+
+Ny klubgrafik fra `klubben.gif` erstatter `public/jazzklub.gif`. Filnavnet i projektet er bevaret, så rum og overgange fortsat bruger samme adresse. Det eksisterende gridkort og dørens overgang er bevaret. `avatar4.gif` er tilføjet til de tilfældige avatarlooks. Originalformatet er 90 × 120 pixels og vises med bevaret proportion i et felt på 120 × 120. Ingen nye afhængigheder.
