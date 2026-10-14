@@ -178,3 +178,10 @@ Servertest: overgange i alle retninger, alle ni tilfældige pladevalg, den omven
 Kontrolleret med server- og DOM-tests: alle rumovergange, pladevalg, blokeringer, startfelter, avatarbevarelse, separate chatlogs, kapacitet på 16, fulde aliases, billedvinduer og Escape, `/help`, maksimum 50 chatlinjer, bobletimere samt loading ved første åbning. DOM-testen er ikke en visuel browserkontrol.
 
 Ved opdatering via GitHubs Upload files slettes gamle filer ikke automatisk. Slet også `public/bg.gif`, `room-map.json` og `jazz-map.json` i repositoryet, hvis de stadig ligger der.
+
+
+## Grafik og billedvisning — 14. oktober 2026
+
+`plade1.gif` til `plade9.gif` samt `plade_omvendt.gif` er erstattet med de nye vedhæftede GIF-filer. Filnavne og klikhandlinger er bevaret. Alle ti nye filer er 600 × 600 pixels.
+
+Billedvinduet har nu en helt gennemsigtig baggrund, så rummet forbliver synligt omkring billedet. Billeder vises med bevarede proportioner og højst 600 pixels i både bredde og højde; mindre skærme begrænser størrelsen yderligere. Klik hvor som helst eller Escape lukker stadig billedet uden at flytte avataren. Hjælpepanelets baggrund er bevaret. Ingen nye afhængigheder.

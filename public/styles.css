@@ -390,9 +390,15 @@ input::placeholder {
   touch-action: manipulation;
   overflow: auto;
 }
+/* No backdrop: keep the room visible behind discovered images. */
+#imageOverlay {
+  background: transparent;
+}
 .image-overlay img {
-  width: min(600px, calc(100vw - 24px));
-  max-height: calc(var(--viewport-h, 100dvh) - 24px);
+  width: auto;
+  height: auto;
+  max-width: min(600px, calc(100vw - 24px));
+  max-height: min(600px, calc(var(--viewport-h, 100dvh) - 24px));
   object-fit: contain;
 }
 .help-card {
