@@ -13,7 +13,7 @@ Jeg hedder Asmus Helms. Jeg er billedkunstner, men arbejder indimellem også med
 
 ## Funktioner
 
-- To rum: tagene og jazzklubben, med op til 16 brugere i hvert.
+- Tre rum: tagene, jazzklubben og en omvendt klub, med op til 16 brugere i hvert.
 - Adgang med et alias på højst 16 tegn. Ingen registrering; aliases behøver ikke være unikke.
 - Klik på et ledigt felt for at flytte med det samme. Ingen bevægelsesanimation.
 - Tilfældigt avatarlook ved indgang. Avatarer er 120 × 120 pixels i verdensmål.
@@ -68,7 +68,7 @@ Filerne ligger i `public/`:
 
 Farvekortets røde områder afviser klik. Gult skifter til jazzklubben. Det lysegrønne felt øverst til højre åbner `seddel2.gif`, feltet ved den runde konstruktion åbner `seddel.gif`, og det nederste åbner `graff.gif`. Mørkegrønt og øvrige farver behandles som almindelig tagflade.
 
-Serveren bruger `rooftops-hit-map.json`, genereret fra farvekortet. Efter ændringer i `tagene_klik.gif` skal kortet genopbygges:
+Tagene bruger `rooftops-hit-map.json`, genereret fra farvekortet. Scriptet nedenfor genopbygger nu alle tre rums pixelkort. Efter ændringer i `tagene_klik.gif` skal kortet genopbygges:
 
 ```bash
 python3 scripts/build_hit_map.py
@@ -76,11 +76,11 @@ python3 scripts/build_hit_map.py
 
 Scriptet kræver Python og Pillow. Genstart serveren efter ændringer. Et gridfelts centrum skal være tilladt, før en bruger kan stå der.
 
-Jazzklubbens blokerede felter styres af `jazz-map.json`. Overgangen tilbage til tagene er defineret i `server.js` ved døren øverst til højre. Den foreløbige hjælpetekst kan ændres i `public/index.html`.
+Klubbens klikområder styres nu af `klubben_klik.gif` og `jazz-hit-map.json`. Den omvendte klub bruger `klubben_omvendt_klik.gif` og `jazz-reverse-hit-map.json`. De tidligere gridkort er fjernet; alle rum bruger nu pixelkort. Den foreløbige hjælpetekst kan ændres i `public/index.html`.
 
 ## Deploy på Render
 
-Projektet bruger Node.js, Express og Socket.IO. Én serverinstans holder styr på begge rum.
+Projektet bruger Node.js, Express og Socket.IO. Én serverinstans holder styr på alle tre rum.
 
 | Indstilling | Værdi |
 | --- | --- |
@@ -144,3 +144,37 @@ Det vedhæftede ASCII-loading-artwork er indsat med skyline, TAGCHAT-logo og byl
 ## Grafikopdatering — 12. oktober 2026
 
 Ny klubgrafik fra `klubben.gif` erstatter `public/jazzklub.gif`. Filnavnet i projektet er bevaret, så rum og overgange fortsat bruger samme adresse. Det eksisterende gridkort og dørens overgang er bevaret. `avatar4.gif` er tilføjet til de tilfældige avatarlooks. Originalformatet er 90 × 120 pixels og vises med bevaret proportion i et felt på 120 × 120. Ingen nye afhængigheder.
+
+
+## Opdatering — 14. oktober 2026: klubkort, plader og omvendt rum
+
+Den nye `klubben(1).gif` er indsat som `public/jazzklub.gif`. Begge klubrum bruger de vedhæftede pixelkort i stedet for det tidligere grove klubkort og dørens faste koordinater. Rødt afviser klik. Hvidt og tegningens sorte streger er almindelige gulvpixels; bevægelse kræver også et tilladt gridcentrum. Startplaceringer bruger samme regler og må ikke lande på overgangs- eller billedfelter.
+
+| Rum | Klikfarve | Handling |
+| --- | --- | --- |
+| Klubben | Blå | Til tagene. |
+| Klubben | Gul | Til det omvendte rum. |
+| Klubben | Grøn | Åbn et tilfældigt billede fra `plade1.gif` til `plade9.gif`. |
+| Omvendt klub | Gul | Tilbage til klubben. |
+| Omvendt klub | Grøn | Åbn `plade_omvendt.gif`. |
+
+`public/klubben_omvendt.gif` er baggrunden til det nye rum. Alle vedhæftede pladefiler er inkluderet uden ændringer. Billeder lukkes ved klik eller Escape som hidtil. Pladevalget foretages på serveren for hvert klik. Rummet har separat chatlog, bevarer avatar og alias ved overgang og har en grænse på 16 samtidige brugere. Ingen dropdown eller nye afhængigheder. Loading-skærmen vises stadig kun ved første åbning.
+
+Efter ændringer i et af de tre klik-kort køres `python3 scripts/build_hit_map.py`, og serveren genstartes. Skriptet kræver Pillow ved genopbygning; Render og almindelig serverstart læser de medfølgende JSON-kort uden Python.
+
+Servertest: overgange i alle retninger, alle ni tilfældige pladevalg, den omvendte plade, blokerede klik, tilladte startfelter, bevarelse af avatar, separate chatlogs, `/help` og afvisning af bruger nummer 17 i det omvendte rum.
+
+
+## Oprydning — 14. oktober 2026
+
+- Fjernet `public/bg.gif`, `room-map.json` og `jazz-map.json`, som ikke længere bruges.
+- Fjernet serverens tidligere rumkatalog og `rooms`-events fra dropdown-navigationen. Klienten modtager kun den aktuelle rumtilstand og onlineantal. Blokeringer kontrolleres fortsat på serveren; det ubrugte blokkeringskort sendes ikke længere til klienten.
+- Fjernet ubrugte klientvariabler, overflødige `async`/`await` og gridkoordinater, som serveren allerede beregner fra klikpositionen.
+- Samlet Escape-håndtering, fjernet en redundant bobleopdatering ved resize og undgået positionsberegning for det skjulte chatpanel.
+- Fjernet døde styles til den tidligere introduktion og loading-tekst samt ubrugte spacing-variabler. Gentagne styles er samlet, og mobilreglerne er bevaret.
+- Erstattet referencer til den ikke-eksisterende `avatar.gif` med gyldige avatarer. Serveren giver en tydelig fejl, hvis der ikke findes nogen nummererede avatarfiler.
+- Samlet grænser for beskeder, aliases, chatlog og gridstørrelse i navngivne konstanter. Formateret JavaScript, CSS og HTML for læsbarhed. Ingen nye runtime-afhængigheder.
+
+Kontrolleret med server- og DOM-tests: alle rumovergange, pladevalg, blokeringer, startfelter, avatarbevarelse, separate chatlogs, kapacitet på 16, fulde aliases, billedvinduer og Escape, `/help`, maksimum 50 chatlinjer, bobletimere samt loading ved første åbning. DOM-testen er ikke en visuel browserkontrol.
+
+Ved opdatering via GitHubs Upload files slettes gamle filer ikke automatisk. Slet også `public/bg.gif`, `room-map.json` og `jazz-map.json` i repositoryet, hvis de stadig ligger der.
